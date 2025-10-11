@@ -67,7 +67,7 @@ const Booking = () => {
 
     setLoading(true);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('bookings')
       .insert({
         client_id: user.id,
@@ -79,7 +79,9 @@ const Booking = () => {
         notes: formData.notes,
         total_price: selectedService.base_price,
         status: 'pending'
-      });
+      })
+      .select()
+      .single();
 
     setLoading(false);
 
@@ -90,11 +92,7 @@ const Booking = () => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Booking successful!",
-        description: "Your booking has been submitted. We'll confirm it soon.",
-      });
-      navigate('/dashboard/client');
+      navigate(`/booking/confirmation?bookingId=${data.id}`);
     }
   };
 
