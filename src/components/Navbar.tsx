@@ -1,8 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Wind } from "lucide-react";
+import { Wind, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
+  const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const getDashboardLink = () => {
+    if (!userRole) return '/auth';
+    return `/dashboard/${userRole}`;
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 py-4">
@@ -20,21 +29,34 @@ const Navbar = () => {
             <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               Home
             </Link>
-            <Link to="/booking" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
-              Book Service
-            </Link>
-            <Link to="/admin" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
-              Admin
-            </Link>
+            {user && userRole === 'client' && (
+              <Link to="/booking" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+                Book Service
+              </Link>
+            )}
+            {user && (
+              <Link to={getDashboardLink()} className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+                Dashboard
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-            <Button variant="accent" size="sm">
-              Get Started
-            </Button>
+            {user ? (
+              <Button variant="outline" size="sm" onClick={signOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
+                  Sign In
+                </Button>
+                <Button variant="accent" size="sm" onClick={() => navigate('/auth')}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

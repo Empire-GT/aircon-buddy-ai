@@ -14,16 +14,244 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          client_id: string
+          commission: number | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          scheduled_date: string
+          scheduled_time: string
+          service_address: string
+          service_city: string
+          service_id: string
+          service_latitude: number | null
+          service_longitude: number | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          technician_id: string | null
+          total_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          commission?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date: string
+          scheduled_time: string
+          service_address: string
+          service_city: string
+          service_id: string
+          service_latitude?: number | null
+          service_longitude?: number | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          technician_id?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          commission?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_date?: string
+          scheduled_time?: string
+          service_address?: string
+          service_city?: string
+          service_id?: string
+          service_latitude?: number | null
+          service_longitude?: number | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          technician_id?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          city: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_name: string
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          base_price: number
+          category: Database["public"]["Enums"]["service_category"]
+          created_at: string | null
+          description: string | null
+          estimated_duration: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          base_price: number
+          category: Database["public"]["Enums"]["service_category"]
+          created_at?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          base_price?: number
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
+      technicians: {
+        Row: {
+          availability_status: string | null
+          completed_jobs: number | null
+          created_at: string | null
+          current_latitude: number | null
+          current_longitude: number | null
+          earnings: number | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          rating: number | null
+          service_area: string[] | null
+          skills: string[] | null
+          total_jobs: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          availability_status?: string | null
+          completed_jobs?: number | null
+          created_at?: string | null
+          current_latitude?: number | null
+          current_longitude?: number | null
+          earnings?: number | null
+          id: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          rating?: number | null
+          service_area?: string[] | null
+          skills?: string[] | null
+          total_jobs?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          availability_status?: string | null
+          completed_jobs?: number | null
+          created_at?: string | null
+          current_latitude?: number | null
+          current_longitude?: number | null
+          earnings?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          rating?: number | null
+          service_area?: string[] | null
+          skills?: string[] | null
+          total_jobs?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "client" | "technician" | "admin"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "assigned"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+      service_category:
+        | "installation"
+        | "dismantle"
+        | "repair"
+        | "cleaning"
+        | "inspection"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +378,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["client", "technician", "admin"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "assigned",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      service_category: [
+        "installation",
+        "dismantle",
+        "repair",
+        "cleaning",
+        "inspection",
+      ],
+    },
   },
 } as const

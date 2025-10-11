@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -7,34 +7,101 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Phone, User, Wrench } from "lucide-react";
-import { toast } from "sonner";
+import { Calendar, MapPin, Wrench } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Booking = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [services, setServices] = useState<any[]>([]);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
     address: "",
-    serviceType: "",
+    city: "Metro Manila",
     date: "",
     time: "",
     notes: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Booking request submitted successfully! We'll contact you shortly.");
-    setTimeout(() => navigate("/"), 2000);
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to book a service",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+    fetchServices();
+  }, [user]);
+
+  const fetchServices = async () => {
+    const { data } = await supabase
+      .from('services')
+      .select('*')
+      .eq('is_active', true)
+      .order('category', { ascending: true });
+    
+    if (data) setServices(data);
   };
 
-  const serviceTypes = [
-    "General Cleaning",
-    "Deep Cleaning",
-    "Repair & Maintenance",
-    "Installation",
-    "Emergency Service",
-  ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user || !selectedService) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase
+      .from('bookings')
+      .insert({
+        client_id: user.id,
+        service_id: selectedService.id,
+        service_address: formData.address,
+        service_city: formData.city,
+        scheduled_date: formData.date,
+        scheduled_time: formData.time,
+        notes: formData.notes,
+        total_price: selectedService.base_price,
+        status: 'pending'
+      });
+
+    setLoading(false);
+
+    if (error) {
+      toast({
+        title: "Booking failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Booking successful!",
+        description: "Your booking has been submitted. We'll confirm it soon.",
+      });
+      navigate('/dashboard/client');
+    }
+  };
+
+  const serviceCategories = {
+    installation: 'Installation',
+    dismantle: 'Dismantle / Removal',
+    repair: 'Repair & Troubleshooting',
+    cleaning: 'General Cleaning',
+    inspection: 'Inspection / Quotation'
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +110,6 @@ const Booking = () => {
       <div className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            {/* Header */}
             <div className="text-center mb-12 space-y-4">
               <h1 className="text-4xl md:text-5xl font-bold">Book Your Service</h1>
               <p className="text-xl text-muted-foreground">
@@ -52,40 +118,40 @@ const Booking = () => {
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
-              {/* Booking Form */}
               <Card className="lg:col-span-2 p-8 shadow-large">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-base font-semibold flex items-center gap-2">
-                        <User className="h-4 w-4 text-accent" />
-                        Full Name
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="John Doe"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        required
-                        className="h-12"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-base font-semibold flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-accent" />
-                        Phone Number
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+63 912 345 6789"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        required
-                        className="h-12"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="service" className="text-base font-semibold flex items-center gap-2">
+                      <Wrench className="h-4 w-4 text-accent" />
+                      Service Type
+                    </Label>
+                    <Select
+                      value={selectedService?.id}
+                      onValueChange={(value) => {
+                        const service = services.find(s => s.id === value);
+                        setSelectedService(service);
+                      }}
+                    >
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select a service" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(serviceCategories).map(([key, label]) => (
+                          <div key={key}>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                              {label}
+                            </div>
+                            {services
+                              .filter(s => s.category === key)
+                              .map((service) => (
+                                <SelectItem key={service.id} value={service.id}>
+                                  {service.name} - ₱{service.base_price}
+                                </SelectItem>
+                              ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -95,7 +161,7 @@ const Booking = () => {
                     </Label>
                     <Input
                       id="address"
-                      placeholder="123 Main Street, City, Province"
+                      placeholder="123 Main Street"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       required
@@ -104,23 +170,19 @@ const Booking = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="serviceType" className="text-base font-semibold flex items-center gap-2">
-                      <Wrench className="h-4 w-4 text-accent" />
-                      Service Type
+                    <Label htmlFor="city" className="text-base font-semibold">
+                      City
                     </Label>
                     <Select
-                      value={formData.serviceType}
-                      onValueChange={(value) => setFormData({ ...formData, serviceType: value })}
+                      value={formData.city}
+                      onValueChange={(value) => setFormData({ ...formData, city: value })}
                     >
                       <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Select a service" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {serviceTypes.map((service) => (
-                          <SelectItem key={service} value={service}>
-                            {service}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="Metro Manila">Metro Manila</SelectItem>
+                        <SelectItem value="Cavite">Cavite</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -138,6 +200,7 @@ const Booking = () => {
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                         required
                         className="h-12"
+                        min={new Date().toISOString().split('T')[0]}
                       />
                     </div>
 
@@ -145,19 +208,14 @@ const Booking = () => {
                       <Label htmlFor="time" className="text-base font-semibold">
                         Preferred Time
                       </Label>
-                      <Select
+                      <Input
+                        id="time"
+                        type="time"
                         value={formData.time}
-                        onValueChange={(value) => setFormData({ ...formData, time: value })}
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="morning">Morning (8AM - 12PM)</SelectItem>
-                          <SelectItem value="afternoon">Afternoon (12PM - 5PM)</SelectItem>
-                          <SelectItem value="evening">Evening (5PM - 8PM)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                        required
+                        className="h-12"
+                      />
                     </div>
                   </div>
 
@@ -174,13 +232,12 @@ const Booking = () => {
                     />
                   </div>
 
-                  <Button type="submit" variant="accent" size="lg" className="w-full">
-                    Submit Booking Request
+                  <Button type="submit" variant="accent" size="lg" className="w-full" disabled={loading}>
+                    {loading ? 'Submitting...' : 'Submit Booking Request'}
                   </Button>
                 </form>
               </Card>
 
-              {/* Booking Summary */}
               <div className="space-y-6">
                 <Card className="p-6 shadow-medium sticky top-24">
                   <h3 className="text-xl font-bold mb-4">Booking Summary</h3>
@@ -188,20 +245,27 @@ const Booking = () => {
                     <div className="pb-4 border-b border-border">
                       <p className="text-sm text-muted-foreground mb-1">Service Type</p>
                       <p className="font-semibold">
-                        {formData.serviceType || "Not selected"}
+                        {selectedService?.name || "Not selected"}
                       </p>
                     </div>
+                    {selectedService && (
+                      <div className="pb-4 border-b border-border">
+                        <p className="text-sm text-muted-foreground mb-1">Service Price</p>
+                        <p className="text-2xl font-bold text-accent">₱{selectedService.base_price}</p>
+                      </div>
+                    )}
                     <div className="pb-4 border-b border-border">
                       <p className="text-sm text-muted-foreground mb-1">Date & Time</p>
                       <p className="font-semibold">
                         {formData.date || "Not selected"}
-                        {formData.time && ` - ${formData.time}`}
+                        {formData.time && ` at ${formData.time}`}
                       </p>
                     </div>
                     <div className="pb-4 border-b border-border">
                       <p className="text-sm text-muted-foreground mb-1">Location</p>
                       <p className="font-semibold">
                         {formData.address || "Not provided"}
+                        {formData.city && `, ${formData.city}`}
                       </p>
                     </div>
                     <div className="pt-2">
