@@ -24,10 +24,7 @@ const ClientDashboard = () => {
       .from('bookings')
       .select(`
         *,
-        services (name, category),
-        technicians (
-          profiles (full_name, phone)
-        )
+        services (name, category)
       `)
       .eq('client_id', user?.id)
       .order('created_at', { ascending: false });
@@ -111,10 +108,10 @@ const ClientDashboard = () => {
                           <MapPin className="h-4 w-4" />
                           <span>{booking.service_address}, {booking.service_city}</span>
                         </div>
-                        {booking.technicians && (
+                        {booking.technician_id && (
                           <div className="flex items-center gap-2">
                             <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span>Technician: {booking.technicians.profiles?.full_name}</span>
+                            <span>Technician Assigned</span>
                           </div>
                         )}
                       </div>

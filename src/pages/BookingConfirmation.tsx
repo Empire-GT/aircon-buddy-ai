@@ -30,8 +30,7 @@ const BookingConfirmation = () => {
         .from('bookings')
         .select(`
           *,
-          services (name, category, base_price),
-          profiles!bookings_client_id_fkey (full_name, phone)
+          services (name, category, base_price)
         `)
         .eq('id', bookingId)
         .maybeSingle();
