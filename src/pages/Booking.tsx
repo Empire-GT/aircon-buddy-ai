@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 const Booking = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [services, setServices] = useState<any[]>([]);
@@ -28,6 +28,9 @@ const Booking = () => {
   });
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking
+    if (authLoading) return;
+    
     if (!user) {
       toast({
         title: "Authentication required",
@@ -38,7 +41,7 @@ const Booking = () => {
       return;
     }
     fetchServices();
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchServices = async () => {
     const { data } = await supabase
