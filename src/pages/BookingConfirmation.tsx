@@ -6,11 +6,14 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, Calendar, MapPin, Clock, Phone, Mail, Download, Share2, Printer, CalendarPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import BookingStatus from "@/components/BookingStatus";
 
 const BookingConfirmation = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const bookingId = searchParams.get('bookingId');
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -21,11 +24,27 @@ const BookingConfirmation = () => {
       navigate('/booking');
       return;
     }
+    
+    // Wait for auth to load before fetching booking
+    if (authLoading) {
+      return;
+    }
+    
+    // Check if user is authenticated
+    if (!user) {
+      setError('Please log in to view your booking');
+      setLoading(false);
+      return;
+    }
+    
     fetchBookingDetails();
-  }, [bookingId]);
+  }, [bookingId, user, authLoading]);
 
   const fetchBookingDetails = async () => {
     try {
+      console.log('Fetching booking with ID:', bookingId);
+      console.log('Current user:', user?.id);
+      
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -35,13 +54,17 @@ const BookingConfirmation = () => {
         .eq('id', bookingId)
         .maybeSingle();
 
+      console.log('Booking query result:', { data, error });
+
       if (error) {
         console.error('Error fetching booking:', error);
-        setError(error.message);
+        setError(`Database error: ${error.message}`);
       } else if (data) {
+        console.log('Booking found:', data);
         setBooking(data);
       } else {
-        setError('Booking not found');
+        console.log('No booking found with ID:', bookingId);
+        setError('Booking not found. This booking may not exist or you may not have permission to view it.');
       }
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -56,10 +79,11 @@ const BookingConfirmation = () => {
   };
 
   const handleDownloadReceipt = () => {
+    const bookingIdFormatted = `BR-${booking.id.slice(0, 8).toUpperCase()}`;
     const receiptData = `
 BOOKING RECEIPT
 =====================================
-Booking ID: ${booking.id.slice(0, 8).toUpperCase()}
+Booking ID: ${bookingIdFormatted}
 Service: ${booking.services.name}
 Date: ${new Date(booking.scheduled_date).toLocaleDateString()}
 Time: ${booking.scheduled_time}
@@ -73,7 +97,7 @@ Status: ${booking.status}
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `booking-${booking.id.slice(0, 8)}.txt`;
+    a.download = `booking-${bookingIdFormatted}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -86,7 +110,7 @@ Status: ${booking.status}
   };
 
   const handleShare = async () => {
-    const shareText = `My CoolAir Pro Booking
+    const shareText = `My ProQual Booking
 Service: ${booking.services.name}
 Date: ${new Date(booking.scheduled_date).toLocaleDateString()} at ${booking.scheduled_time}
 Address: ${booking.service_address}, ${booking.service_city}`;
@@ -94,7 +118,7 @@ Address: ${booking.service_address}, ${booking.service_city}`;
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'CoolAir Pro Booking',
+          title: 'ProQual Booking',
           text: shareText,
         });
       } catch (err) {
@@ -117,19 +141,21 @@ Address: ${booking.service_address}, ${booking.service_city}`;
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
 
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('CoolAir Pro Service - ' + booking.services.name)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent('Service: ' + booking.services.name + '\nAddress: ' + booking.service_address + ', ' + booking.service_city)}&location=${encodeURIComponent(booking.service_address + ', ' + booking.service_city)}`;
+    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('ProQual Service - ' + booking.services.name)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent('Service: ' + booking.services.name + '\nAddress: ' + booking.service_address + ', ' + booking.service_city)}&location=${encodeURIComponent(booking.service_address + ', ' + booking.service_city)}`;
     
     window.open(calendarUrl, '_blank');
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-24 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading your booking confirmation...</p>
+            <p className="text-muted-foreground">
+              {authLoading ? 'Loading authentication...' : 'Loading your booking confirmation...'}
+            </p>
           </div>
         </div>
       </div>
@@ -150,6 +176,18 @@ Address: ${booking.service_address}, ${booking.service_city}`;
               <p className="text-muted-foreground mb-8">
                 {error || "We couldn't find this booking. It may have been removed or you don't have permission to view it."}
               </p>
+              
+              {/* Debug Information */}
+              <div className="bg-muted/50 rounded-lg p-4 mb-6 text-left">
+                <h3 className="font-semibold mb-2">Debug Information:</h3>
+                <div className="text-sm space-y-1">
+                  <p><strong>Booking ID:</strong> {bookingId || 'Not provided'}</p>
+                  <p><strong>User ID:</strong> {user?.id || 'Not authenticated'}</p>
+                  <p><strong>User Email:</strong> {user?.email || 'Not authenticated'}</p>
+                  <p><strong>Auth Loading:</strong> {authLoading ? 'Yes' : 'No'}</p>
+                  <p><strong>Error:</strong> {error || 'None'}</p>
+                </div>
+              </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button onClick={() => navigate('/dashboard/client')} variant="accent">
                   Go to My Bookings
@@ -188,7 +226,7 @@ Address: ${booking.service_address}, ${booking.service_city}`;
               <div className="space-y-6">
                 <div className="pb-4 border-b border-border">
                   <p className="text-sm text-muted-foreground mb-1">Booking ID</p>
-                  <p className="font-mono font-semibold">{booking.id.slice(0, 8).toUpperCase()}</p>
+                  <p className="font-mono font-semibold">BR-{booking.id.slice(0, 8).toUpperCase()}</p>
                 </div>
 
                 <div className="pb-4 border-b border-border">
@@ -252,6 +290,9 @@ Address: ${booking.service_address}, ${booking.service_city}`;
               </div>
             </Card>
 
+            {/* Real-time Booking Status */}
+            <BookingStatus bookingId={bookingId!} />
+
             {/* Next Steps Card */}
             <Card className="p-6 bg-accent/5 border-accent/20 mb-6">
               <h3 className="font-bold text-lg mb-4">What happens next?</h3>
@@ -307,8 +348,8 @@ Address: ${booking.service_address}, ${booking.service_city}`;
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-accent" />
-                  <a href="mailto:support@coolairpro.com" className="font-semibold hover:text-accent transition-colors">
-                    support@coolairpro.com
+                  <a href="mailto:support@proqual.com" className="font-semibold hover:text-accent transition-colors">
+                    support@proqual.com
                   </a>
                 </div>
               </div>

@@ -38,7 +38,7 @@ const Auth = () => {
         
         navigate('/');
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -52,9 +52,24 @@ const Auth = () => {
 
         if (error) throw error;
 
+        if (data.user) {
+          // Update the profile with additional information
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              full_name: fullName,
+              phone: phone,
+            })
+            .eq('id', data.user.id);
+
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+          }
+        }
+
         toast({
           title: "Account created!",
-          description: "Welcome to CoolAir Pro. You can now book services.",
+          description: "Welcome to ProQual. You can now book services.",
         });
         
         navigate('/');
@@ -75,7 +90,7 @@ const Auth = () => {
       <Card className="w-full max-w-md p-8 shadow-large">
         <div className="flex items-center justify-center mb-8">
           <Wind className="h-8 w-8 text-accent mr-2" />
-          <span className="text-2xl font-bold">CoolAir Pro</span>
+          <span className="text-2xl font-bold">ProQual</span>
         </div>
 
         <h2 className="text-3xl font-bold mb-2 text-center">

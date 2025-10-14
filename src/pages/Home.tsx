@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
-import { Calendar, Shield, Clock, Star, CheckCircle, Users, Wind } from "lucide-react";
+import AIChat from "@/components/AIChat";
+import { Calendar, Shield, Clock, Star, CheckCircle, Users, Wind, Wrench, Settings, Droplets, Search, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-aircon.jpg";
 import technicianImage from "@/assets/technician-service.jpg";
 
@@ -35,6 +36,88 @@ const Home = () => {
     { name: "Deep Cleaning", price: "From ₱800" },
     { name: "Repair & Maintenance", price: "From ₱1,200" },
     { name: "Installation", price: "From ₱2,500" },
+  ];
+
+  const detailedServices = [
+    {
+      icon: Wrench,
+      title: "Installation",
+      description: "Professional installation of window, split, and cassette type air conditioners",
+      price: "From ₱2,500",
+      features: ["Expert installation", "Warranty included", "Free consultation"]
+    },
+    {
+      icon: Settings,
+      title: "Repair & Maintenance",
+      description: "Comprehensive repair services and regular maintenance to keep your AC running efficiently",
+      price: "From ₱800",
+      features: ["Diagnostic service", "Parts replacement", "Performance optimization"]
+    },
+    {
+      icon: Droplets,
+      title: "Deep Cleaning",
+      description: "Thorough cleaning service to remove dirt, bacteria, and improve air quality",
+      price: "From ₱800",
+      features: ["Complete disassembly", "Antibacterial treatment", "Filter replacement"]
+    },
+    {
+      icon: Search,
+      title: "Inspection & Quotation",
+      description: "Professional inspection and detailed quotation for your aircon needs",
+      price: "From ₱500",
+      features: ["Detailed assessment", "Written report", "Transparent pricing"]
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Johnson",
+      location: "Makati City",
+      rating: 5,
+      comment: "Excellent service! The technician was professional, punctual, and did a thorough job. My AC is working like new again.",
+      service: "Deep Cleaning"
+    },
+    {
+      name: "Michael Chen",
+      location: "Quezon City",
+      rating: 5,
+      comment: "Fast and reliable service. The booking process was so easy and the technician arrived exactly on time. Highly recommended!",
+      service: "Repair Service"
+    },
+    {
+      name: "Maria Santos",
+      location: "Taguig City",
+      rating: 5,
+      comment: "Great value for money. The technician explained everything clearly and the service was completed quickly. Will definitely use again.",
+      service: "Installation"
+    }
+  ];
+
+  const faqs = [
+    {
+      question: "How do I book a service?",
+      answer: "Simply click 'Book Now' and fill out our easy booking form. Select your service type, preferred date and time, and we'll match you with a qualified technician."
+    },
+    {
+      question: "Are your technicians certified?",
+      answer: "Yes, all our technicians are certified professionals with extensive experience in air conditioning installation, repair, and maintenance."
+    },
+    {
+      question: "What areas do you serve?",
+      answer: "We currently serve Metro Manila and surrounding areas. Check our service areas page for the complete list of covered locations."
+    },
+    {
+      question: "Do you provide warranties?",
+      answer: "Yes, we provide warranties on all our services. Installation services come with a 1-year warranty, while repairs and maintenance have a 90-day warranty."
+    },
+    {
+      question: "How much do your services cost?",
+      answer: "Our pricing is transparent and competitive. Basic cleaning starts at ₱800, repairs from ₱1,200, and installations from ₱2,500. Get a free quote for your specific needs."
+    },
+    {
+      question: "Can I reschedule my appointment?",
+      answer: "Yes, you can reschedule your appointment up to 24 hours before your scheduled time through your dashboard or by contacting our support team."
+    }
   ];
 
   const stats = [
@@ -75,7 +158,14 @@ const Home = () => {
                     <Calendar className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => {
+                    const servicesSection = document.getElementById('services');
+                    servicesSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
                   Learn More
                 </Button>
               </div>
@@ -120,7 +210,7 @@ const Home = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl font-bold">Why Choose CoolAir Pro?</h2>
+            <h2 className="text-4xl font-bold">Why Choose ProQual?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Experience the future of aircon servicing with our technology-driven platform
             </p>
@@ -188,6 +278,122 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Detailed Services Section */}
+      <section id="services" className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold">Our Services</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive aircon solutions tailored to your needs
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {detailedServices.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <Card key={index} className="p-6 hover:shadow-large transition-all duration-300 border-2 hover:border-accent/50 group">
+                  <div className="mb-4 p-3 bg-gradient-accent rounded-lg w-fit group-hover:scale-110 transition-transform">
+                    <Icon className="h-6 w-6 text-accent-foreground" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{service.title}</h3>
+                  <p className="text-muted-foreground mb-4">{service.description}</p>
+                  <div className="text-2xl font-bold text-accent mb-4">{service.price}</div>
+                  <ul className="space-y-2">
+                    {service.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold">What Our Customers Say</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Real feedback from satisfied customers across Metro Manila
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="p-6 hover:shadow-large transition-all duration-300">
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-500 fill-current" />
+                  ))}
+                </div>
+                <p className="text-muted-foreground mb-4 italic">"{testimonial.comment}"</p>
+                <div className="border-t pt-4">
+                  <div className="font-semibold">{testimonial.name}</div>
+                  <div className="text-sm text-muted-foreground">{testimonial.location}</div>
+                  <div className="text-sm text-accent font-medium">{testimonial.service}</div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold">Frequently Asked Questions</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Find answers to common questions about our services
+            </p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-4">
+            {faqs.map((faq, index) => (
+              <Card key={index} className="p-6">
+                <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
+                <p className="text-muted-foreground">{faq.answer}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-20 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold">Get in Touch</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Have questions? We're here to help you with all your aircon needs
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <Card className="p-6 text-center hover:shadow-large transition-all duration-300">
+              <Phone className="h-8 w-8 text-accent mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Call Us</h3>
+              <p className="text-muted-foreground mb-2">+63 123 456 7890</p>
+              <p className="text-sm text-muted-foreground">Mon-Fri 8AM-6PM</p>
+            </Card>
+            <Card className="p-6 text-center hover:shadow-large transition-all duration-300">
+              <Mail className="h-8 w-8 text-accent mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Email Us</h3>
+              <p className="text-muted-foreground mb-2">support@proqual.com</p>
+              <p className="text-sm text-muted-foreground">24/7 Support</p>
+            </Card>
+            <Card className="p-6 text-center hover:shadow-large transition-all duration-300">
+              <MapPin className="h-8 w-8 text-accent mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Service Areas</h3>
+              <p className="text-muted-foreground mb-2">Metro Manila</p>
+              <p className="text-sm text-muted-foreground">And surrounding areas</p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -196,7 +402,7 @@ const Home = () => {
             <div className="relative p-12 text-center space-y-6">
               <h2 className="text-4xl font-bold">Ready to Experience the Difference?</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Join thousands of satisfied customers who trust CoolAir Pro for their aircon needs
+                Join thousands of satisfied customers who trust ProQual for their aircon needs
               </p>
               <div className="flex flex-wrap justify-center gap-4 pt-4">
                 <Link to="/booking">
@@ -204,9 +410,9 @@ const Home = () => {
                     Book Your Service
                   </Button>
                 </Link>
-                <Link to="/admin">
+                <Link to="/pricing">
                   <Button variant="outline" size="lg">
-                    Admin Dashboard
+                    View Pricing
                   </Button>
                 </Link>
               </div>
@@ -221,17 +427,20 @@ const Home = () => {
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-2">
               <Wind className="h-6 w-6" />
-              <span className="text-xl font-bold">CoolAir Pro</span>
+              <span className="text-xl font-bold">ProQual</span>
             </div>
             <p className="text-primary-foreground/80">
               Professional aircon services at your fingertips
             </p>
             <p className="text-sm text-primary-foreground/60">
-              © 2025 CoolAir Pro. All rights reserved.
+              © 2025 ProQual. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
+
+      {/* AI Chat */}
+      <AIChat />
     </div>
   );
 };

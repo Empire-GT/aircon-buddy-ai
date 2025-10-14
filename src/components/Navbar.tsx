@@ -21,13 +21,16 @@ const Navbar = () => {
               <Wind className="h-6 w-6 text-accent-foreground" />
             </div>
             <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              CoolAir Pro
+              ProQual
             </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
               Home
+            </Link>
+            <Link to="/pricing" className="text-foreground/80 hover:text-foreground transition-colors font-medium">
+              Pricing
             </Link>
             {user && userRole === 'client' && (
               <Link to="/booking" className="text-foreground/80 hover:text-foreground transition-colors font-medium">

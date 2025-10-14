@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -83,11 +83,9 @@ const Admin = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <div className="pt-24 pb-20">
-        <div className="container mx-auto px-4">
+    <DashboardLayout>
+      <div className="p-6">
+        <div className="container mx-auto">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
@@ -255,7 +253,7 @@ const Admin = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="font-mono text-sm text-muted-foreground">{booking.id}</span>
+                            <span className="font-mono text-sm text-muted-foreground">BR-{booking.id.slice(0, 8).toUpperCase()}</span>
                             <span className={`text-xs px-2 py-1 rounded-full ${
                               booking.status === 'Completed' ? 'bg-green-100 text-green-700' :
                               booking.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
@@ -289,7 +287,7 @@ const Admin = () => {
           </Tabs>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

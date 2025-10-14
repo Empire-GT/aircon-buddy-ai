@@ -2,8 +2,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://yryknjbnhvxfmfyjzsdj.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyeWtuamJuaHZ4Zm1meWp6c2RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNjQ5NzQsImV4cCI6MjA3NTc0MDk3NH0.2OuEHitEWp9ELwXKJiEFU_Dds-OFNSbZ_hqf1dFZPxc';
+
+// Debug: Log the credentials being used
+console.log('Supabase URL:', SUPABASE_URL);
+console.log('Supabase Key:', SUPABASE_PUBLISHABLE_KEY ? 'Set' : 'Not set');
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
