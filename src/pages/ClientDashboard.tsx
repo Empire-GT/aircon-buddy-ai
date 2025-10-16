@@ -27,11 +27,13 @@ import {
   X,
   RefreshCw,
   History,
-  Plus
+  Plus,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import RescheduleModal from '@/components/RescheduleModal';
+import MessagingLayout from '@/components/MessagingLayout';
 
 const ClientDashboard = () => {
   const { user } = useAuth();
@@ -45,6 +47,7 @@ const ClientDashboard = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bookings');
+  const [activeSection, setActiveSection] = useState('dashboard');
   
   // Profile editing state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -102,8 +105,7 @@ const ClientDashboard = () => {
       .from('bookings')
       .select(`
         *,
-        services (name, category),
-        technicians (id, profiles!inner(full_name, phone))
+        services (name, category)
       `)
       .eq('client_id', user?.id)
       .order('created_at', { ascending: false });
@@ -328,8 +330,13 @@ const ClientDashboard = () => {
     }
   };
 
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+    setActiveTab(section);
+  };
+
   return (
-    <DashboardLayout>
+    <DashboardLayout activeSection={activeSection} onSectionChange={handleSectionChange}>
       <div className="p-6">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Client Dashboard</h1>
@@ -339,7 +346,7 @@ const ClientDashboard = () => {
         </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="bookings" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Bookings
@@ -351,6 +358,10 @@ const ClientDashboard = () => {
               <TabsTrigger value="equipment" className="flex items-center gap-2">
                 <AirVent className="h-4 w-4" />
                 Equipment
+              </TabsTrigger>
+              <TabsTrigger value="messages" className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4" />
+                Messages
               </TabsTrigger>
               <TabsTrigger value="notifications" className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />
@@ -422,6 +433,19 @@ const ClientDashboard = () => {
                               <Eye className="h-4 w-4 mr-1" />
                               View Details
                             </Button>
+                            {booking.technician_id && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setActiveTab('messages');
+                                  // You could also set a specific booking to open in chat
+                                }}
+                              >
+                                <MessageCircle className="h-4 w-4 mr-1" />
+                                Chat
+                              </Button>
+                            )}
                             {canRescheduleBooking(booking.scheduled_date, booking.status) && (
                               <Button 
                                 variant="outline" 
@@ -700,6 +724,17 @@ const ClientDashboard = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            {/* Messages Tab */}
+            <TabsContent value="messages" className="mt-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Messages</h2>
+                <p className="text-muted-foreground">
+                  Chat with your assigned technicians about your bookings
+                </p>
+              </div>
+              <MessagingLayout className="h-[600px]" />
             </TabsContent>
 
             {/* Notifications Tab */}

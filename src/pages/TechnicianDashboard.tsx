@@ -4,10 +4,11 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, DollarSign, Star, CheckCircle, Clock, User, Bell, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, DollarSign, Star, CheckCircle, Clock, User, Bell, TrendingUp, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import MessagingLayout from '@/components/MessagingLayout';
 
-type DashboardSection = 'dashboard' | 'jobs' | 'profile' | 'earnings' | 'notifications' | 'faq';
+type DashboardSection = 'dashboard' | 'jobs' | 'profile' | 'earnings' | 'notifications' | 'messages' | 'faq';
 
 const TechnicianDashboard = () => {
   const { user } = useAuth();
@@ -24,13 +25,19 @@ const TechnicianDashboard = () => {
   }, [user]);
 
   const fetchTechnicianData = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('technicians')
       .select('*')
       .eq('id', user?.id)
       .single();
 
-    if (data) setTechData(data);
+    if (error) {
+      console.log('No technician profile found for user:', user?.id);
+      // This is normal for users who haven't completed their technician application
+      setTechData(null);
+    } else if (data) {
+      setTechData(data);
+    }
   };
 
   const fetchBookings = async () => {
@@ -38,8 +45,7 @@ const TechnicianDashboard = () => {
       .from('bookings')
       .select(`
         *,
-        services (name, category),
-        profiles!client_id (full_name, phone, address)
+        services (name, category)
       `)
       .eq('technician_id', user?.id)
       .in('status', ['confirmed', 'assigned', 'in_progress'])
@@ -135,12 +141,20 @@ const TechnicianDashboard = () => {
 
                     <div className="p-3 bg-secondary/30 rounded-lg">
                       <p className="text-sm">
-                        <strong>Client:</strong> {booking.profiles?.full_name} • {booking.profiles?.phone}
+                        <strong>Client:</strong> Client • Contact info not available
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2 ml-4">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setActiveSection('messages')}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Chat
+                    </Button>
                     {booking.status === 'confirmed' && (
                       <Button 
                         variant="accent"
@@ -213,12 +227,20 @@ const TechnicianDashboard = () => {
 
                   <div className="p-3 bg-secondary/30 rounded-lg">
                     <p className="text-sm">
-                      <strong>Client:</strong> {booking.profiles?.full_name} • {booking.profiles?.phone}
+                      <strong>Client:</strong> Client • Contact info not available
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2 ml-4">
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveSection('messages')}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Chat
+                  </Button>
                   {booking.status === 'confirmed' && (
                     <Button 
                       variant="accent"
@@ -394,7 +416,7 @@ const TechnicianDashboard = () => {
               <div className="flex-1">
                 <h3 className="font-bold mb-1">New Job Assignment</h3>
                 <p className="text-muted-foreground mb-2">
-                  You have been assigned to {booking.services?.name} for {booking.profiles?.full_name}
+                  You have been assigned to {booking.services?.name} for a client
                 </p>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span>{new Date(booking.scheduled_date).toLocaleDateString()}</span>
@@ -412,6 +434,19 @@ const TechnicianDashboard = () => {
           </Card>
         )}
       </div>
+    </div>
+  );
+
+  // Messages Section Component
+  const MessagesSection = () => (
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Messages</h1>
+        <p className="text-muted-foreground text-lg">
+          Chat with your clients about their bookings
+        </p>
+      </div>
+      <MessagingLayout className="h-[600px]" />
     </div>
   );
 
@@ -478,6 +513,8 @@ const TechnicianDashboard = () => {
         return <EarningsSection />;
       case 'notifications':
         return <NotificationsSection />;
+      case 'messages':
+        return <MessagesSection />;
       case 'faq':
         return <FAQSection />;
       default:

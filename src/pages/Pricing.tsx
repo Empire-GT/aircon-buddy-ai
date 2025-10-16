@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { CheckCircle, Star, Wrench, Settings, Droplets, Search, Calendar } from "lucide-react";
 
 const Pricing = () => {
@@ -338,6 +339,8 @@ const Pricing = () => {
           </div>
         </section>
       </div>
+      
+      <Footer />
     </div>
   );
 };

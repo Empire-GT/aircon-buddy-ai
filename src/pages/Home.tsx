@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import AIChat from "@/components/AIChat";
 import { Calendar, Shield, Clock, Star, CheckCircle, Users, Wind, Wrench, Settings, Droplets, Search, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import heroImage from "@/assets/hero-aircon.jpg";
@@ -93,32 +94,6 @@ const Home = () => {
     }
   ];
 
-  const faqs = [
-    {
-      question: "How do I book a service?",
-      answer: "Simply click 'Book Now' and fill out our easy booking form. Select your service type, preferred date and time, and we'll match you with a qualified technician."
-    },
-    {
-      question: "Are your technicians certified?",
-      answer: "Yes, all our technicians are certified professionals with extensive experience in air conditioning installation, repair, and maintenance."
-    },
-    {
-      question: "What areas do you serve?",
-      answer: "We currently serve Metro Manila and surrounding areas. Check our service areas page for the complete list of covered locations."
-    },
-    {
-      question: "Do you provide warranties?",
-      answer: "Yes, we provide warranties on all our services. Installation services come with a 1-year warranty, while repairs and maintenance have a 90-day warranty."
-    },
-    {
-      question: "How much do your services cost?",
-      answer: "Our pricing is transparent and competitive. Basic cleaning starts at ₱800, repairs from ₱1,200, and installations from ₱2,500. Get a free quote for your specific needs."
-    },
-    {
-      question: "Can I reschedule my appointment?",
-      answer: "Yes, you can reschedule your appointment up to 24 hours before your scheduled time through your dashboard or by contacting our support team."
-    }
-  ];
 
   const stats = [
     { value: "5,000+", label: "Happy Customers" },
@@ -342,25 +317,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl font-bold">Frequently Asked Questions</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Find answers to common questions about our services
-            </p>
-          </div>
-          <div className="max-w-3xl mx-auto space-y-4">
-            {faqs.map((faq, index) => (
-              <Card key={index} className="p-6">
-                <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
-                <p className="text-muted-foreground">{faq.answer}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Contact Section */}
       <section className="py-20 bg-secondary/30">
@@ -421,23 +377,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-2">
-              <Wind className="h-6 w-6" />
-              <span className="text-xl font-bold">ProQual</span>
-            </div>
-            <p className="text-primary-foreground/80">
-              Professional aircon services at your fingertips
-            </p>
-            <p className="text-sm text-primary-foreground/60">
-              © 2025 ProQual. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* AI Chat */}
       <AIChat />

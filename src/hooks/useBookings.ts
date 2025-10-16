@@ -40,12 +40,7 @@ export const useBookings = () => {
         .from('bookings')
         .select(`
           *,
-          services (name, category),
-          client_profiles:profiles!client_id (full_name, phone, email),
-          technicians (
-            id,
-            technician_profiles:profiles!id (full_name, phone)
-          )
+          services (name, category)
         `)
         .order('created_at', { ascending: false });
 
